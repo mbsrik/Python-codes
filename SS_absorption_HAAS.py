@@ -5,7 +5,7 @@ Created on Tue Apr 13 17:48:24 2021
 @author: P303007
 """
 
-
+#HAAS setup, small spectrometer
 import glob
 from numpy import *
 from matplotlib import *
