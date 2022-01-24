@@ -5,6 +5,7 @@ Created on Mon Jul 26 18:51:22 2021
 @author: P303007
 """
 
+#---------------------Monochromator (using Region of interest setting)
 
 import glob
 from numpy import *
@@ -27,15 +28,8 @@ plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
 plt.rc('legend', fontsize=12)    # legend fontsize
 plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
-#fig1,ax1 = plt.subplots(figsize = [8,8])
-#fig2,ax2 = plt.subplots(figsize = [8,8])
-##fig3,ax3 = plt.subplots(figsize = [8,8])
-#fig4,ax4 = plt.subplots(figsize = [8,8])
-
-#fig5,ax5 = plt.subplots(figsize = [8,8])
-
-
-fig6,ax6 = plt.subplots(1,4,figsize = [8,8])
+fig1,ax1 = plt.subplots(figsize =  [8,8])
+fig2,ax2 = plt.subplots(figsize = 1,2,[8,8])
 
 
 def offset_correction(x,m,c):  #baseline correcion
@@ -47,7 +41,7 @@ def function(WL):  #function what i want to plot on secondary x axis
 def inverse(WL):  #inverse of the above defined function 
         return 10**4/WL  
 
-def convert_ROI(file) :#, specified_lines) :  #converting data to numpy
+def convert_ROI(file) :#, specified_lines) :  #converting data to numpy (Region of interest)
     
     line_0 = []  # gives number of pixels
     line_1 = []  # has word "Strip"
@@ -147,106 +141,12 @@ def convert_ROI(file) :#, specified_lines) :  #converting data to numpy
        
     return (pixels, m_perpend,  m_parallel)
      
-def convert_full(file) :#, specified_lines) :  #converting data to numpy
-    
-
-    line_all = []  #line 0 - "Pixels" and number of pixels ; lin e 1  - pixel number (aka 1) and "Strip" ; rest of the lines : has pixel number, and intensities
-    
-    n = 512
-    
-    for z in range(n) : 
-        line_all.append([])
-     
-   
-    specified_lines = np.linspace(0,513,514)
-    specified_lines.remove(1)  #removing line 1 which only has the word "strip"
-  
-    for pos,value in enumerate(file) : 
-           
-           count = 0  #starting index to store the values from string
-           
-           if pos in specified_lines :  #chosing the required line
-               
-                for space,k in enumerate(value) :   #checking where spcae is present
-                
-                  if k == '\t' or  space == len(str(value)) - 1 :  #storing values by checking where '\t' is present
-                       
-                       line_all[pos].append(value[count  : space    : 1])
-                       count = space + 1 
-                       
-    for l in range (0, n ) :   #converting the values in the line to ndarray, type = 'float'
-         
-        if l == 0 :    # to get number of pixels - 1 to 512
-                    
-            line_all[l] = str(line_all[l])
-            
-            line_all[l]  = line_all[l].replace("'", "")  #removing additional quotes
-            line_all[l] = line_all[l].split(",")    #separting strings by comma
-            line_all[l] = line_all[l] [1 : 513]
-            
-            pixels = zeros(len(line_all[l])) 
-            
-            for u in range(0, len(pixels)) :
-                
-                pixels[u] = line_all[l][u]
-            
-         
-        else : #line 1 has words "strip", so omitting line 1
-            
-         
-            line_all[l] = str(line_all[l])
-            line_all[l]  = line_all[l].replace("'", "")   #removing additional quotes
-            line_all[l] = line_all[l].split(",")  #separting strings by comma
-           
-            line_all[l] = line_all[l] [1 : 513]   
-                      
-            if l == 3 :  #line 3 - fibre placed parallel
-                
-                m_parallel = zeros(len(line_all[l]))
-                
-                for u in range(0, len(m_parallel)) :
-                    
-                    if u == 511 :   # removing  ' ]' from last element
-                        
-                        last_element = str(line_all[l][u])
-                        
-                        line_all[l][u] = last_element[0 : len(last_element) - 1]
-                        
-                        line_all[l][u] = float(line_all[l][u])
-                        
-                        m_parallel[u] = line_all[l][u]
-                    
-                    else :
-                        m_parallel[u] = line_all[l][u]
-            
-            if l == 2 :  #line 3 - fibre placed perpendicular
                  
-                      m_perpend = zeros(len(line_all[l]))
-                
-                      for u in range(0, len(m_perpend)) :
-                          
-                           if u == 511 :   # removing  ' ]' from last element
-                        
-                                last_element = str(line_all[l][u])
-                        
-                                line_all[l][u] = last_element[0 : len(last_element) - 1]
-                        
-                                line_all[l][u] = float(line_all[l][u])
-                                
-                                m_perpend[u] = line_all[l][u]
-                        
-                           else :
-            
-                                m_perpend[u] = line_all[l][u]
-                    
-                    
-       
-    return (pixels, m_perpend,  m_parallel)                      
     
-def offset_correction(x,m,c):  #baseline correcion
+def offset_correction(x,m,c):  #baseline correcion funtion
         return m*x+c
 
-def offset_function (position_offset, value_offset, position, value) :
+def offset_function (position_offset, value_offset, position, value) :    #offset correction 
     
     correction, co = curve_fit(offset_correction, position_offset , value_offset )  #taking central value to describe the method used  (for paper)
             
@@ -256,7 +156,7 @@ def offset_function (position_offset, value_offset, position, value) :
     
     return (value,fit_offset)
 
-def linear_dichroism (parallel, perpendicular) :
+def linear_dichroism (parallel, perpendicular) :  # linear dichrosim
     
     dicrohism = zeros (len (parallel)) #calculating the difference of the spectra
     total = zeros (len (parallel))   #denominator of reduced LDR
@@ -269,12 +169,12 @@ def linear_dichroism (parallel, perpendicular) :
         
         ldr[z] =  dicrohism[z]/total [z]   #ldr
     
-    return (dicrohism, total)
+    return (ldr)
 
-#%% Calibration
-'''
-calibration_files = glob.glob("Calibration\\*.txt")
-print (calibration_files)
+#%% Calibration  #calibraing pixels to WL (nm)
+
+calibration_files = glob.glob("Calibration\\*.txt")  #reading calibration files 
+#print (calibration_files)
 
 
 for i in range(0, 1 ) :#len(calibration_files)) :
@@ -286,7 +186,7 @@ for i in range(0, 1 ) :#len(calibration_files)) :
     
 #    print (pixels[255], len(pixels), pixels[511])
     
-    peaks_positive = find_peaks(m_perpend, height= 4000)
+    peaks_positive = find_peaks(m_perpend, height= 4000)  #finding peaks
     
     pixel_peaks = zeros( (len(peaks_positive[0])))
     
@@ -310,7 +210,7 @@ for i in range(0, 1 ) :#len(calibration_files)) :
         
         WL[t] = WL[234] - (234 - t) *deltaWL
        
-        
+     
     
     if 1 : #i == 0  :
    #     ax2[i].plot (pixels, m_parallel , color = 'blue' ,label ="parallel" ) #m_parallel, 'o')
@@ -318,7 +218,7 @@ for i in range(0, 1 ) :#len(calibration_files)) :
         
      #   ax3.plot (WL, m_perpend)
         
-        for t in range (0, len(pixel_peaks)) :
+        for t in range (0, len(pixel_peaks)) :  # marking peaks in the calibration plot
                
             ax2.axvline ( x = pixel_peaks[t], color = 'k', linestyle = '--')
         
@@ -326,22 +226,18 @@ for i in range(0, 1 ) :#len(calibration_files)) :
         ax2.set_xlabel ("Pixels")
         ax2.set_ylabel("Intensity")
         #ax2.legend()
-'''
+
 
 #%% DWNTs(ROI)
 
-files_all = glob.glob("*.txt")
+files_all = glob.glob("*.txt")  #reading data files path
 print (files_all)
 
-#files_all = files_all [1 : 5]
 
-#print (files_all)
-
-for i in range(0, 4 ) :#len(calibration_files)) :
+for i in range(0, len(files_all) ) : 
     
-    print (files_all[0], files_all[i+2])
-    
-    files_ref = open(files_all[0])  #ref_file
+      
+    files_ref = open(files_all[0])  # ref_file
      
     files = open(files_all[i+2])     #data file
     
@@ -356,61 +252,35 @@ for i in range(0, 4 ) :#len(calibration_files)) :
     ref_parallel  = m_parallel_ref
     ref_perpend = m_perpend_ref
     
-    absorb_parall_raw =  -log(spectra_parallel/abs(ref_parallel))
+    absorb_parall_raw =  -log(spectra_parallel/abs(ref_parallel))  #reading data from one detector
     
+    absorb_parall,y = offset_function (pixels [370 : 430], absorb_parall_raw[370 : 430], pixels, absorb_parall_raw)  #offset correction
+     
+    absorb_perpend_raw =  -log(spectra_perpend/abs(ref_perpend)) #reading data from second detector
+    absorb_perpend,z = offset_function (pixels [370 : 430], absorb_perpend_raw[370 : 430], pixels, absorb_perpend_raw)  #offset correction
     
-    absorb_parall,y = offset_function (pixels [370 : 430], absorb_parall_raw[370 : 430], pixels, absorb_parall_raw)
+    WL = zeros(len(pixels))  #defining wavelength
     
-    absorb_perpend_raw =  -log(spectra_perpend/abs(ref_perpend))
-    absorb_perpend,z = offset_function (pixels [370 : 430], absorb_perpend_raw[370 : 430], pixels, absorb_perpend_raw)
-    
-    WL = zeros(len(pixels))
-    for t in range(0, len(WL)) :
+    for t in range(0, len(WL)) :  #pixels to WL
         
         
         WL[234] = 546.08
         
-        deltaWL = 0.493
+        deltaWL = 0.493     # 1 pixel = 0.493 nm
         
         WL[t] = WL[234] - (234 - t) *deltaWL
     
-    ax6[i].plot (WL, absorb_perpend ,  label ="parallel" )  
+    ax2[i].plot (WL, absorb_perpend ,  label ="parallel" )  
      
-    ax6[i].plot (WL, absorb_parall ,  label ="perpendicular" )
+    ax2[i].plot (WL, absorb_parall ,  label ="perpendicular" )
       
-    ax6[i].set_title ("Flow-rate  (microreactor) " + str(i+1))
+    ax2[i].set_title ("Flow-rate  (microreactor) " + str(i+1))
        
-    ax6[i].set_ylabel ("Absorbance")
-    ax6[i].set_xlabel ("Wavelength (nm)")
+    ax2[i].set_ylabel ("Absorbance")
+    ax2[i].set_xlabel ("Wavelength (nm)")
     
-    ax6[i].legend()
+    ax2[i].legend()
 
-'''        
-    if i == 0 : #1 :# i == 0 :  #NTs
-        
-        ax3.plot (WL, absorb_parall ,  label ="parallel"  )
-        ax3.plot (WL, absorb_perpend ,  label ="perpendicular" )  
-        
-        ax3.set_title ("NTs/bundles spectrum - dye recycled from NTs")
-    
-    else :  #monomer
-        
-        ax4.plot (WL, absorb_parall ,  label ="parallel"  )
-      #  ax4.plot (WL, absorb_perpend ,  label ="perpendicular" )  
-        ax4.set_title ("Stock spectrum - dye recycled from NTs")
-    
-        
-        ax4.legend()
-   
-        
-        ldr,den  = linear_dichroism( absorb_perpend, absorb_parall) 
-        
-        #print (ldr/den)
-       # ax4.plot (WL,ldr/den)
-       
-'''       
-                
-        
         
         
  
