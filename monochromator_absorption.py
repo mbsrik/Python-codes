@@ -177,7 +177,7 @@ calibration_files = glob.glob("Calibration\\*.txt")  #reading calibration files
 #print (calibration_files)
 
 
-for i in range(0, 1 ) :#len(calibration_files)) :
+for i in range(0, 1 ) : #Calibartion 
     
      
     file_cal = open(calibration_files[i+2])
