@@ -114,6 +114,6 @@ for i in range(0, len(files_all)) :
    
 ax1.set_xlabel ("Wavelength (nm)")
 ax1.set_ylabel ("Absorbance")    
-ax1.set_xkinm (480 , 650)    
+ax1.set_xlim (480 , 650)    
     
     
