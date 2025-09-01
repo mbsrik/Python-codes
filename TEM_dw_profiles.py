@@ -596,9 +596,6 @@ ax3.legend()
 #%% Histograms
 
 
-
-dip_dip_each_outer[23] = 11  #Only for NWO conference, problem with Gaussian
-
 #rounding data to one decimal place
 boundary_each = np.sort(boundary_each)
 boundary_each = np.round(boundary_each, 1)
